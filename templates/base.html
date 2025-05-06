@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prática de Conjugação Portuguesa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Prática de Conjugação Portuguesa</h1>
+        <nav class="toolbar">
+            <ul>
+                <li><a href="{{ url_for('index') }}">Início</a></li>
+                <li><a href="{{ url_for('records') }}">Registros de Verbos</a></li>
+                <li><a href="{{ url_for('sentences') }}">Frases Registradas</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        {% if request.args.get('message') %}
+        <div class="message">
+            {{ request.args.get('message') }}
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Prática de Conjugação Portuguesa</p>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="exercise-section">
+    <div class="exercise-header">
+        <h2>Exercício {{ exercise_num }} de {{ total_exercises }}</h2>
+        <div class="verb-info">
+            <h3>Verbo: <span class="highlight">{{ verb }}</span></h3>
+            <h3>Tempo: <span class="highlight">{{ tense_name }}</span></h3>
+        </div>
+    </div>
+    
+    <form id="conjugationForm" method="post" action="{{ url_for('exercise') }}">
+        <div class="conjugation-grid">
+            {% for i in range(4) %}
+            <div class="pronoun-row">
+                <label for="answer_{{ i }}">{{ pronouns[i] }}</label>
+                <input type="text" 
+                       id="answer_{{ i }}" 
+                       name="answer_{{ i }}" 
+                       class="conjugation-input" 
+                       autocomplete="off" 
+                       {% if i == 0 %}autofocus{% endif %}>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn primary-btn">Verificar</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.conjugation-input');
+    
+    // Add event listeners to handle keyboard navigation
+    inputs.forEach((input, index) => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                // If this is the "ele" input (index 1) and it's empty, copy from "eu" input
+                if (index === 1 && input.value.trim() === '') {
+                    input.value = inputs[0].value;
+                }
+                
+                // Move to next input or submit form if on last input
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                } else {
+                    document.getElementById('conjugationForm').submit();
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

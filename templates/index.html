@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="home-section">
+    <h2>Bem-vindo à Prática de Conjugação Portuguesa</h2>
+    <p>Pratique a conjugação de verbos em português com exercícios interativos.</p>
+    
+    <div class="action-buttons">
+        <a href="{{ url_for('start_exercises') }}" class="btn primary-btn">Iniciar 5 Exercícios</a>
+        <a href="{{ url_for('records') }}" class="btn secondary-btn">Ver Registros de Verbos</a>
+        <a href="{{ url_for('sentences') }}" class="btn secondary-btn">Ver Frases Registradas</a>
+    </div>
+</section>
+{% endblock %}

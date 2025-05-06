@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="sentence-practice-section">
+    <h2>Prática de Frases</h2>
+    <p>Para cada conjugação que você errou, escreva uma frase usando a forma correta do verbo.</p>
+    
+    <form method="post" action="{{ url_for('sentence_practice') }}">
+        {% for i, error in enumerate(errors) %}
+        <div class="sentence-item">
+            <div class="sentence-prompt">
+                <p>
+                    <strong>Verbo:</strong> {{ error.verb }} | 
+                    <strong>Tempo:</strong> {{ error.tense }} | 
+                    <strong>Pronome:</strong> {{ error.pronoun }}
+                </p>
+                <p class="correct-form">Forma correta: <strong>{{ error.correct }}</strong></p>
+            </div>
+            <div class="sentence-input">
+                <label for="sentence_{{ i }}">Escreva uma frase usando "{{ error.correct }}":</label>
+                <textarea id="sentence_{{ i }}" name="sentence_{{ i }}" rows="2" required></textarea>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn primary-btn">Verificar Frases</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

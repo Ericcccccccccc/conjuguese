@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="records-section">
+    <h2>Registros de Verbos</h2>
+    
+    <div class="records-container">
+        {% for verb in verbs %}
+        <div class="verb-record">
+            <h3 class="verb-title">{{ verb }}</h3>
+            
+            <div class="tenses-container">
+                {% for tense in verbs[verb] %}
+                <div class="tense-record" data-verb="{{ verb }}" data-tense="{{ tense }}">
+                    <div class="tense-header">
+                        <h4>{{ tense_names[tense] }}</h4>
+                        <div class="tense-status {% if verbs_data[verb][tense].all_correct %}correct{% endif %}">
+                            {% if verbs_data[verb][tense].all_correct %}
+                            <span class="status-badge">Completo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="conjugations-list">
+                        {% for i in range(4) %}
+                        <div class="conjugation-record">
+                            <span class="pronoun">{{ pronouns[i] }}:</span>
+                            <span class="conjugation">{{ verbs[verb][tense][i] }}</span>
+                            
+                            {% set result = verbs_data[verb][tense].results.get(pronouns[i], {}) %}
+                            {% if result %}
+                            <div class="last-answer {% if result.correct %}correct{% else %}incorrect{% endif %}">
+                                <span class="answer-text">{{ result.last_answer }}</span>
+                                <span class="answer-time">{{ result.timestamp.split('T')[0] }} {{ result.timestamp.split('T')[1][:8] }}</span>
+                            </div>
+                            {% else %}
+                            <div class="no-answer">Não praticado</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="tense-preferences">
+                        <label class="preference-option">
+                            <input type="checkbox" 
+                                   class="never-show-checkbox" 
+                                   {% if verbs_data[verb][tense].never_show %}checked{% endif %}
+                                   data-verb="{{ verb }}" 
+                                   data-tense="{{ tense }}">
+                            Nunca mostrar
+                        </label>
+                        <label class="preference-option">
+                            <input type="checkbox" 
+                                   class="always-show-checkbox" 
+                                   {% if verbs_data[verb][tense].always_show %}checked{% endif %}
+                                   data-verb="{{ verb }}" 
+                                   data-tense="{{ tense }}">
+                            Mostrar mesmo se completo
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle preference checkboxes
+    const neverShowCheckboxes = document.querySelectorAll('.never-show-checkbox');
+    const alwaysShowCheckboxes = document.querySelectorAll('.always-show-checkbox');
+    
+    // Function to update preferences
+    function updatePreferences(verb, tense, neverShow, alwaysShow) {
+        fetch('{{ url_for("update_preferences") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `verb=${verb}&tense=${tense}&never_show=${neverShow}&always_show=${alwaysShow}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Preferences updated successfully');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating preferences:', error);
+        });
+    }
+    
+    // Add event listeners to never show checkboxes
+    neverShowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const verb = this.dataset.verb;
+            const tense = this.dataset.tense;
+            const neverShow = this.checked;
+            
+            // If "never show" is checked, uncheck "always show"
+            if (neverShow) {
+                const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+                if (alwaysShowCheckbox && alwaysShowCheckbox.checked) {
+                    alwaysShowCheckbox.checked = false;
+                }
+            }
+            
+            // Get the current state of the always show checkbox
+            const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+            const alwaysShow = alwaysShowCheckbox ? alwaysShowCheckbox.checked : false;
+            
+            updatePreferences(verb, tense, neverShow, alwaysShow);
+        });
+    });
+    
+    // Add event listeners to always show checkboxes
+    alwaysShowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const verb = this.dataset.verb;
+            const tense = this.dataset.tense;
+            const alwaysShow = this.checked;
+            
+            // If "always show" is checked, uncheck "never show"
+            if (alwaysShow) {
+                const neverShowCheckbox = document.querySelector(`.never-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+                if (neverShowCheckbox && neverShowCheckbox.checked) {
+                    neverShowCheckbox.checked = false;
+                }
+            }
+            
+            // Get the current state of the never show checkbox
+            const neverShowCheckbox = document.querySelector(`.never-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+            const neverShow = neverShowCheckbox ? neverShowCheckbox.checked : false;
+            
+            updatePreferences(verb, tense, neverShow, alwaysShow);
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="sentence-results-section">
+    <h2>Resultados das Frases</h2>
+    
+    <div class="sentence-results">
+        {% for sentence in sentences %}
+        <div class="sentence-result-item">
+            <div class="sentence-info">
+                <p>
+                    <strong>Verbo:</strong> {{ sentence.verb }} | 
+                    <strong>Tempo:</strong> {{ sentence.tense }} | 
+                    <strong>Pronome:</strong> {{ sentence.pronoun }}
+                </p>
+                <p class="correct-form">Forma correta: <strong>{{ sentence.correct_form }}</strong></p>
+            </div>
+            <div class="sentence-text {% if sentence.is_correct %}correct{% else %}incorrect{% endif %}">
+                <p>{{ sentence.sentence }}</p>
+                <div class="validation-mark">
+                    {% if sentence.is_correct %}
+                    <span class="check-mark">✓</span>
+                    {% else %}
+                    <span class="x-mark">✗</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="form-actions">
+        <a href="{{ url_for('index') }}" class="btn primary-btn">Voltar ao Início</a>
+    </div>
+</section>
+{% endblock %}

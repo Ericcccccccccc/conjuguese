@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="results-section">
+    <div class="results-header">
+        <h2>Resultados</h2>
+        <div class="verb-info">
+            <h3>Verbo: <span class="highlight">{{ verb }}</span></h3>
+            <h3>Tempo: <span class="highlight">{{ tense_name }}</span></h3>
+        </div>
+    </div>
+    
+    <div class="results-grid">
+        {% for result in results %}
+        <div class="result-row">
+            <div class="pronoun">{{ result.pronoun }}</div>
+            <div class="user-answer {% if result.is_correct %}correct{% else %}incorrect{% endif %}">
+                {{ result.user_answer }}
+                {% if not result.is_correct %}
+                <span class="correction">→ {{ result.correct_answer }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="result-message">
+        {% if all_correct %}
+        <p class="success-message">Parabéns! Todas as conjugações estão corretas.</p>
+        {% else %}
+        <p class="error-message">Algumas conjugações precisam de correção. Revise os erros acima.</p>
+        {% endif %}
+    </div>
+    
+    <div class="form-actions">
+        <a href="{{ next_url }}" class="btn primary-btn">Próximo Exercício</a>
+    </div>
+</section>
+{% endblock %}

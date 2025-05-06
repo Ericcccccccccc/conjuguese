@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="sentences-section">
+    <h2>Frases Registradas</h2>
+    
+    {% if sentences %}
+    <div class="sentences-container">
+        {% for sentence in sentences %}
+        <div class="sentence-item {% if sentence.is_correct %}correct{% else %}incorrect{% endif %}">
+            <div class="sentence-info">
+                <p>
+                    <strong>Verbo:</strong> {{ sentence.verb }} | 
+                    <strong>Tempo:</strong> {{ tense_names[sentence.tense] }} | 
+                    <strong>Pronome:</strong> {{ sentence.pronoun }}
+                </p>
+                <p class="correct-form">Forma correta: <strong>{{ sentence.correct_form }}</strong></p>
+            </div>
+            <div class="sentence-text">
+                <p>{{ sentence.sentence }}</p>
+            </div>
+            <div class="sentence-meta">
+                <span class="sentence-time">{{ sentence.timestamp.split('T')[0] }} {{ sentence.timestamp.split('T')[1][:8] }}</span>
+                <span class="sentence-status">
+                    {% if sentence.is_correct %}
+                    <span class="check-mark">✓</span>
+                    {% else %}
+                    <span class="x-mark">✗</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-data-message">
+        <p>Nenhuma frase registrada ainda. Complete alguns exercícios com erros para praticar frases.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
