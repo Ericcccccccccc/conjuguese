@@ -12,3 +12,20 @@
     </div>
 </section>
 {% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default Enter key behavior
+            const hrefValue = "{{ url_for('start_exercises') }}";
+            const startButton = document.querySelector(`a.btn.primary-btn[href="${hrefValue}"]`);
+            if (startButton) {
+                startButton.click();
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

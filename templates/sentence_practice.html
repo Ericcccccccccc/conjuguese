@@ -3,7 +3,7 @@
 {% block content %}
 <section class="sentence-practice-section">
     <h2>Prática de Frases</h2>
-    <p>Para cada conjugação que você errou, escreva uma frase usando a forma correta do verbo.</p>
+    <p>Para cada conjugação incorreta, escreva uma frase usando a forma verbal indicada (ex: "eu", "Maria e eu", "vocês").</p>
     
     <form method="post" action="{{ url_for('sentence_practice') }}">
         {% for i, error in enumerate(errors) %}
@@ -11,14 +11,13 @@
             <div class="sentence-prompt">
                 <p>
                     <strong>Verbo:</strong> {{ error.verb }} | 
-                    <strong>Tempo:</strong> {{ error.tense }} | 
-                    <strong>Pronome:</strong> {{ error.pronoun }}
+                    <strong>Tempo:</strong> {{ tense_names[error.tense] }} | 
+                    <strong>Forma:</strong> {{ error.pronoun }}
                 </p>
-                <p class="correct-form">Forma correta: <strong>{{ error.correct }}</strong></p>
+                {# <p class="correct-form">Forma correta: <strong>{{ error.correct }}</strong></p> #}
             </div>
             <div class="sentence-input">
-                <label for="sentence_{{ i }}">Escreva uma frase usando "{{ error.correct }}":</label>
-                <textarea id="sentence_{{ i }}" name="sentence_{{ i }}" rows="2" required></textarea>
+                <textarea id="sentence_{{ i }}" name="sentence_{{ i }}" rows="2" required spellcheck="false"></textarea>
             </div>
         </div>
         {% endfor %}
@@ -28,4 +27,37 @@
         </div>
     </form>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sentencePracticeUrl = "{{ url_for('sentence_practice') }}";
+    const form = document.querySelector(`form[action="${sentencePracticeUrl}"]`);
+    if (form) {
+        const textareas = form.querySelectorAll('textarea');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        textareas.forEach((textarea, index) => {
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) { // Allow Shift+Enter for new lines
+                    e.preventDefault();
+                    if (index < textareas.length - 1) {
+                        textareas[index + 1].focus();
+                    } else {
+                        if (submitButton) {
+                            submitButton.click();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Focus the first textarea on page load
+        if (textareas.length > 0) {
+            textareas[0].focus();
+        }
+    }
+});
+</script>
 {% endblock %}

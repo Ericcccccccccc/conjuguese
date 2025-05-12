@@ -33,7 +33,22 @@
     </div>
     
     <div class="form-actions">
-        <a href="{{ next_url }}" class="btn primary-btn">Próximo Exercício</a>
+        <a href="{{ next_url }}" class="btn primary-btn">{{ button_text }}</a>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nextButton = document.querySelector('.primary-btn');
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            nextButton.click();
+        }
+    });
+});
+</script>
 {% endblock %}
