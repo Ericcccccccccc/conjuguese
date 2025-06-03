@@ -8,9 +8,9 @@
             <h3>Verbo: <span class="highlight">{{ verb }}</span></h3>
             <h3>Tempo: <span class="highlight">{{ tense_name }}</span></h3>
         </div>
-    </div>
+        </div>
     
-    <form id="conjugationForm" method="post" action="{{ url_for('exercise') }}">
+    <form id="conjugationForm" method="post" action="{{ url_for('exercise.exercise') }}">
         <div class="conjugation-grid">
             {% for i in range(4) %}
             <div class="pronoun-row">
@@ -34,29 +34,32 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('.conjugation-input');
-    
-    // Add event listeners to handle keyboard navigation
-    inputs.forEach((input, index) => {
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                
-                // If this is the "ele" input (index 1) and it's empty, copy from "eu" input
-                if (index === 1 && input.value.trim() === '') {
-                    input.value = inputs[0].value;
+    // Embed correct conjugations directly into a JavaScript variable
+    window.correctConjugations = {{ correct_conjugations | tojson | safe }};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.conjugation-input');
+        
+        // Add event listeners to handle keyboard navigation
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    
+                    // If this is the "ele" input (index 1) and it's empty, copy from "eu" input
+                    if (index === 1 && input.value.trim() === '') {
+                        input.value = inputs[0].value;
+                    }
+                    
+                    // Move to next input or submit form if on last input
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else {
+                        document.getElementById('conjugationForm').submit();
+                    }
                 }
-                
-                // Move to next input or submit form if on last input
-                if (index < inputs.length - 1) {
-                    inputs[index + 1].focus();
-                } else {
-                    document.getElementById('conjugationForm').submit();
-                }
-            }
+            });
         });
     });
-});
 </script>
 {% endblock %}

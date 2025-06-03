@@ -27,28 +27,36 @@
     <div class="result-message">
         {% if all_correct %}
         <p class="success-message">Parabéns! Todas as conjugações estão corretas.</p>
+        {% elif remediation_errors %}
+        <p class="error-message">Você cometeu alguns erros. Pratique as conjugações corretas abaixo.</p>
         {% else %}
         <p class="error-message">Algumas conjugações precisam de correção. Revise os erros acima.</p>
         {% endif %}
     </div>
-    
+
+    {# Display the next button if next_url and button_text are provided (for intermediate exercises or finalization without remediation) #}
+    {% if next_url and button_text %}
     <div class="form-actions">
         <a href="{{ next_url }}" class="btn primary-btn">{{ button_text }}</a>
     </div>
+    {% endif %}
+
 </section>
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const nextButton = document.querySelector('.primary-btn');
+    const nextButton = document.querySelector('.form-actions .primary-btn');
     
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            nextButton.click();
-        }
-    });
+    if (nextButton) {
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nextButton.click();
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

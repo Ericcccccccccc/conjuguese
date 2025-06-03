@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="remediation-practice-section">
+    <h2>Prática de Remediação</h2>
+    <p>Corrija as conjugações e escreva frases para as formas verbais indicadas.</p>
+    
+    <form id="remediationForm" method="post" action="{{ url_for('exercise.remediation_flow') }}">
+        {% if sentence_errors %}
+        <div class="remediation-sentences-section">
+            <h3>Escreva frases para as formas verbais:</h3>
+            <p>Para cada conjugação incorreta, escreva uma frase usando a forma verbal indicada (ex: "eu", "Maria e eu", "vocês").</p>
+            {% for i, error in enumerate(sentence_errors) %}
+            <div class="sentence-item">
+                <div class="sentence-prompt">
+                    <p>
+                        <strong>Verbo:</strong> {{ error.verb }} | 
+                        <strong>Tempo:</strong> {{ TENSE_NAMES[error.tense] }} | 
+                        <strong>Forma:</strong> {{ error.pronoun }}
+                    </p>
+                </div>
+                <div class="sentence-input">
+                    <textarea id="sentence_{{ i }}" 
+                              name="remediation_sentence_{{ i }}" 
+                              rows="2" 
+                              required 
+                              spellcheck="false"
+                              class="remediation-input"></textarea>
+                    <input type="hidden" name="error_sentence_{{ i }}_verb" value="{{ error.verb }}">
+                    <input type="hidden" name="error_sentence_{{ i }}_tense" value="{{ error.tense }}">
+                    <input type="hidden" name="error_sentence_{{ i }}_pronoun" value="{{ error.pronoun }}">
+                    <input type="hidden" name="error_sentence_{{ i }}_correct" value="{{ error.correct }}">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if remediation_errors %}
+        <div class="remediation-words-section">
+            <h3>Corrija as conjugações:</h3>
+            <p>Corrija as conjugações incorretas abaixo.</p>
+            <div class="remediation-grid">
+                {% for error in remediation_errors %}
+                <div class="sentence-item"> {# Reusing sentence-item class for consistent box styling #}
+                    <div class="sentence-prompt"> {# Reusing sentence-prompt class for consistent styling #}
+                        <p>
+                            <strong>Verbo:</strong> {{ error.verb }} | 
+                            <strong>Tempo:</strong> {{ TENSE_NAMES[error.tense] }} | 
+                            <strong>Forma:</strong> {{ error.pronoun }}
+                        </p>
+                    </div>
+                    <div class="sentence-input"> {# Reusing sentence-input for consistent input styling #}
+                        <input type="text" 
+                               name="remediation_word_{{ loop.index0 }}" 
+                               class="remediation-input" {# Keep remediation-input for specific styling #}
+                               placeholder="Digite a conjugação correta" 
+                               autocomplete="off"
+                               data-correct="{{ error.correct }}">
+                    </div>
+                    <input type="hidden" name="error_word_{{ loop.index0 }}_verb" value="{{ error.verb }}">
+                    <input type="hidden" name="error_word_{{ loop.index0 }}_tense" value="{{ error.tense }}">
+                    <input type="hidden" name="error_word_{{ loop.index0 }}_pronoun" value="{{ error.pronoun }}">
+                    <input type="hidden" name="error_word_{{ loop.index0 }}_correct" value="{{ error.correct }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn primary-btn">Verificar Remediação</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.remediation-input');
+    const form = document.getElementById('remediationForm');
+    
+    inputs.forEach((input, index) => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !(input.tagName === 'TEXTAREA' && e.shiftKey)) {
+                e.preventDefault();
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                } else {
+                    form.submit();
+                }
+            }
+        });
+    });
+
+    // Focus the first input on page load
+    if (inputs.length > 0) {
+        inputs[0].focus();
+    }
+});
+</script>
+{% endblock %}

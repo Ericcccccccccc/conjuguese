@@ -6,9 +6,9 @@
     <p>Pratique a conjugação de verbos em português com exercícios interativos.</p>
     
     <div class="action-buttons">
-        <a href="{{ url_for('start_exercises') }}" class="btn primary-btn">Iniciar 5 Exercícios</a>
-        <a href="{{ url_for('records') }}" class="btn secondary-btn">Ver Registros de Verbos</a>
-        <a href="{{ url_for('sentences') }}" class="btn secondary-btn">Ver Frases Registradas</a>
+        <a href="{{ url_for('exercise.start_exercises') }}" class="btn primary-btn">Iniciar 5 Exercícios</a>
+        <a href="{{ url_for('main.records') }}" class="btn secondary-btn">Ver Registros de Verbos</a>
+        <a href="{{ url_for('main.sentences') }}" class="btn secondary-btn">Ver Frases Registradas</a>
     </div>
 </section>
 {% endblock %}
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             event.preventDefault(); // Prevent default Enter key behavior
-            const hrefValue = "{{ url_for('start_exercises') }}";
+            const hrefValue = "{{ url_for('exercise.start_exercises') }}";
             const startButton = document.querySelector(`a.btn.primary-btn[href="${hrefValue}"]`);
             if (startButton) {
                 startButton.click();

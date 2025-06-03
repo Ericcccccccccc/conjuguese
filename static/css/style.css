@@ -297,14 +297,96 @@ h3 {
     font-weight: bold;
 }
 
-/* Sentence Practice */
-.sentence-practice-section {
+/* Remediation Practice Section */
+.remediation-practice-section {
     background-color: var(--card-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     padding: var(--spacing-xl);
 }
 
+.remediation-words-section,
+.remediation-sentences-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+}
+
+.remediation-words-section h3,
+.remediation-sentences-section h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--secondary-color);
+}
+
+.remediation-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.remediation-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.remediation-item p {
+    font-weight: bold;
+    text-align: right;
+}
+
+.remediation-input {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: var(--font-family); /* Ensure consistent font */
+    width: 100%; /* Ensure textareas also take full width */
+    resize: vertical; /* Allow vertical resize for textareas */
+}
+
+.remediation-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+/* Remediation Results Section */
+.remediation-results-section {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: var(--spacing-xl);
+}
+
+.remediation-words-results,
+.remediation-sentences-results {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+}
+
+.remediation-words-results h3,
+.remediation-sentences-results h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--secondary-color);
+}
+
+/* Reusing .results-grid and .result-row for word remediation results */
+.remediation-words-results .results-grid {
+    margin-bottom: 0; /* Override default margin */
+}
+
+/* Reusing .sentence-result-item for sentence remediation results */
+.remediation-sentences-results .sentence-result-item {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* General styles for sentence items (from sentence_practice.html) */
 .sentence-item {
     margin-bottom: var(--spacing-xl);
     padding: var(--spacing-md);
@@ -322,32 +404,10 @@ h3 {
     color: var(--primary-color);
 }
 
-.sentence-input label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: bold;
-}
-
-.sentence-input textarea {
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    resize: vertical;
-}
-
-.sentence-input textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
-}
-
-/* Sentence Results */
-.sentence-results-section {
-    background-color: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: var(--spacing-xl);
+/* General styles for sentence results (from sentence_results.html) */
+.sentence-results {
+    display: grid;
+    gap: var(--spacing-lg);
 }
 
 .sentence-result-item {
@@ -378,6 +438,60 @@ h3 {
 
 .x-mark {
     color: var(--error-color);
+}
+
+.gemini-feedback-container {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px dashed var(--border-color);
+}
+
+.gemini-feedback-container h4 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--secondary-color);
+}
+
+.gemini-feedback-container p {
+    margin-bottom: var(--spacing-xs);
+}
+
+.gemini-feedback-container ul {
+    list-style-type: disc;
+    margin-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-xs);
+}
+
+.feedback-section {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px dotted var(--border-color);
+}
+
+.feedback-section h5 {
+    margin-bottom: var(--spacing-xs);
+    color: var(--light-text);
+}
+
+.feedback-error {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+/* Loading Spinner for Feedback */
+.loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    display: none; /* Hidden by default, shown by JS */
+    margin: var(--spacing-sm) auto; /* Center it */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Records Page */

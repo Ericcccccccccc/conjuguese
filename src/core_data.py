@@ -1,5 +1,5 @@
 """
-Data model for Portuguese verb conjugations.
+Static data for Portuguese verb conjugations.
 """
 
 VERBS = {
@@ -81,7 +81,7 @@ VERBS = {
         "preterito_imperfeito": ["abria", "abria", "abríamos", "abriam"],
         "subjuntivo_presente": ["abra", "abra", "abramos", "abram"],
         "subjuntivo_preterito": ["abrisse", "abrisse", "abríssemos", "abrissem"],
-        "subjuntivo_futuro": ["abrir", "abrir", "abrimos", "abrirem"]
+        "subjuntivo_futuro": ["abrir", "abrir", "abrirmos", "abrirem"]
     },
     "ser": {
         "presente": ["sou", "é", "somos", "são"],
@@ -246,7 +246,7 @@ VERBS = {
     "conseguir": {
         "presente": ["consigo", "consegue", "conseguimos", "conseguem"],
         "preterito_perfeito": ["consegui", "conseguiu", "conseguimos", "conseguiram"],
-        "preterito_imperfeito": ["conseguia", "conseguia", "conseguíamos", "conseguaiam"],
+        "preterito_imperfeito": ["conseguia", "conseguia", "conseguíamos", "conseguiam"],
         "subjuntivo_presente": ["consiga", "consiga", "consigamos", "consigam"],
         "subjuntivo_preterito": ["conseguisse", "conseguisse", "conseguíssemos", "conseguissem"],
         "subjuntivo_futuro": ["conseguir", "conseguir", "conseguirmos", "conseguirem"]

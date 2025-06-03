@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="remediation-results-section">
+    <h2>Resultados da Remediação</h2>
+    
+    {% if remediation_results %}
+    <div class="remediation-words-results">
+        <h3>Conjugações Corrigidas:</h3>
+        <div class="results-grid">
+            {% for result in remediation_results %}
+            <div class="result-row">
+                <div class="pronoun">{{ result.error.pronoun }}</div>
+                <div class="user-answer {% if result.is_correct %}correct{% else %}incorrect{% endif %}">
+                    {{ result.user_answer }}
+                    {% if not result.is_correct %}
+                    <span class="correction">→ {{ result.error.correct }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if sentence_practice_results %}
+    <div class="remediation-sentences-results">
+        <h3>Resultados da Prática de Frases:</h3>
+        <div class="sentence-results">
+            {% for sentence in sentence_practice_results %}
+            <div class="sentence-result-item">
+                <div class="sentence-info">
+                    <p>
+                        <strong>Verbo:</strong> {{ sentence.verb }} | 
+                        <strong>Tempo:</strong> {{ TENSE_NAMES[sentence.tense] }} | 
+                        <strong>Pronome:</strong> {{ sentence.pronoun }}
+                    </p>
+                    <p class="correct-form">Forma correta: <strong>{{ sentence.correct_form }}</strong></p>
+                </div>
+                <div class="sentence-text {% if sentence.is_correct %}correct{% else %}incorrect{% endif %}">
+                    <p>{{ sentence.sentence }}</p>
+                    <div class="validation-mark">
+                        {% if sentence.is_correct %}
+                        <span class="check-mark">✓</span>
+                        {% else %}
+                        <span class="x-mark">✗</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="gemini-feedback-container" id="feedback-{{ sentence.index }}">
+                    <h4>Feedback Detalhado:</h4>
+                    <div class="loading-spinner"></div> {# Loading spinner #}
+                    <p>Carregando feedback...</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+        {% if is_remediation_successful is true %}
+        <a href="{{ url_for('main.clear_session_and_index', status='success_remediation') }}" class="btn primary-btn">Finalizar Exercício</a>
+        {% else %}
+        <a href="{{ url_for('main.clear_session_and_index', status='failed_remediation') }}" class="btn primary-btn">Finalizar Exercício</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script id="sentence-results-json" type="application/json">
+    {{ sentence_practice_results | tojson | safe }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("remediation_results.html: DOMContentLoaded fired.");
+    const sentenceResultsScript = document.getElementById('sentence-results-json');
+    let sentenceResults = [];
+    if (sentenceResultsScript && sentenceResultsScript.textContent) {
+        try {
+            sentenceResults = JSON.parse(sentenceResultsScript.textContent);
+            console.log("remediation_results.html: Parsed sentenceResults:", sentenceResults);
+        } catch (e) {
+            console.error("remediation_results.html: Error parsing sentence results data:", e);
+        }
+    } else {
+        console.log("remediation_results.html: sentenceResultsScript or its textContent is missing.");
+    }
+
+    async function fetchAndRenderFeedback(sentenceData) {
+        const feedbackContainer = document.getElementById(`feedback-${sentenceData.index}`);
+        if (!feedbackContainer) {
+            console.error(`remediation_results.html: Feedback container not found for index ${sentenceData.index}`);
+            return;
+        }
+
+        const loadingSpinner = feedbackContainer.querySelector('.loading-spinner');
+        const loadingText = feedbackContainer.querySelector('p');
+
+        // Show loading state
+        if (loadingSpinner) loadingSpinner.style.display = 'block';
+        if (loadingText) loadingText.textContent = 'Carregando feedback...';
+
+        const fetchUrl = '{{ url_for("exercise.get_sentence_feedback") }}';
+        const requestBody = JSON.stringify({
+            user_sentence: sentenceData.sentence,
+            verb: sentenceData.verb,
+            tense: sentenceData.tense,
+            pronoun: sentenceData.pronoun,
+            correct_form: sentenceData.correct_form
+        });
+
+        console.log(`remediation_results.html: Fetching feedback for index ${sentenceData.index}. URL: ${fetchUrl}, Body: ${requestBody}`);
+
+        try {
+            const response = await fetch(fetchUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: requestBody,
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+
+            const feedback = await response.json();
+            console.log(`remediation_results.html: Received feedback for index ${sentenceData.index}:`, feedback);
+
+            // Clear loading state
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (loadingText) loadingText.style.display = 'none';
+
+            // Render feedback
+            let feedbackHtml = '';
+            if (feedback && !feedback.error) {
+                if (feedback.is_portuguese === true) {
+                    feedbackHtml += `<p><strong>Avaliação Geral:</strong> Esta parece ser uma frase em português.</p>`;
+                } else if (feedback.is_portuguese === false) {
+                    feedbackHtml += `<p><strong>Avaliação Geral:</strong> Esta frase não parece ser em português.</p>`;
+                } else {
+                    feedbackHtml += `<p><strong>Avaliação Geral:</strong> Análise de idioma pendente.</p>`;
+                }
+
+                if (feedback.overall_comment) {
+                    feedbackHtml += `<p><strong>Comentário Geral:</strong> ${feedback.overall_comment.replace(/\\n/g, '<br>')}</p>`;
+                }
+
+                if (feedback.is_portuguese && feedback.feedback) {
+                    const details = feedback.feedback;
+                    if (details.grammar_analysis) {
+                        feedbackHtml += `<div class="feedback-section"><h5>Análise Gramatical:</h5><p>${details.grammar_analysis.replace(/\\n/g, '<br>')}</p></div>`;
+                    }
+                    if (details.spelling_errors && details.spelling_errors.length > 0) {
+                        feedbackHtml += `<div class="feedback-section"><h5>Erros Ortográficos:</h5><ul>`;
+                        details.spelling_errors.forEach(err => {
+                            feedbackHtml += `<li>"${err.error}" → "${err.correction}"</li>`;
+                        });
+                        feedbackHtml += `</ul></div>`;
+                    }
+                    if (details.naturalness_evaluation) {
+                        feedbackHtml += `<div class="feedback-section"><h5>Naturalidade:</h5><p>${details.naturalness_evaluation.replace(/\\n/g, '<br>')}</p></div>`;
+                    }
+                    if (details.suggestions && details.suggestions.length > 0) {
+                        feedbackHtml += `<div class="feedback-section"><h5>Sugestões:</h5><ul>`;
+                        details.suggestions.forEach(sugg => {
+                            feedbackHtml += `<li>${sugg}</li>`;
+                        });
+                        feedbackHtml += `</ul></div>`;
+                    }
+                }
+            } else if (feedback && feedback.error) {
+                feedbackHtml += `<p class="feedback-error"><strong>Erro ao obter feedback:</strong> ${feedback.error}</p>`;
+            } else {
+                feedbackHtml += `<p>Nenhum feedback adicional disponível.</p>`;
+            }
+            feedbackContainer.innerHTML = `<h4>Feedback Detalhado:</h4>${feedbackHtml}`;
+
+        } catch (error) {
+            console.error('remediation_results.html: Error fetching feedback:', error);
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+            if (loadingText) loadingText.style.display = 'none';
+            feedbackContainer.innerHTML = `<h4>Feedback Detalhado:</h4><p class="feedback-error">Erro ao carregar feedback: ${error.message || error}</p>`;
+        }
+    }
+
+    // Fetch feedback for each sentence concurrently
+    if (sentenceResults && sentenceResults.length > 0) {
+        sentenceResults.forEach(sentence => {
+            fetchAndRenderFeedback(sentence);
+        });
+    } else {
+        console.log("remediation_results.html: No sentence results to fetch feedback for.");
+    }
+});
+</script>
+{% endblock %}

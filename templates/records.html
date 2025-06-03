@@ -57,6 +57,14 @@
                                    data-tense="{{ tense }}">
                             Mostrar mesmo se completo
                         </label>
+                        <label class="preference-option">
+                            <input type="checkbox"
+                                   class="show-primarily-checkbox"
+                                   {% if verbs_data[verb][tense].show_primarily %}checked{% endif %}
+                                   data-verb="{{ verb }}"
+                                   data-tense="{{ tense }}">
+                            Mostrar prioritariamente
+                        </label>
                     </div>
                 </div>
                 {% endfor %}
@@ -73,15 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle preference checkboxes
     const neverShowCheckboxes = document.querySelectorAll('.never-show-checkbox');
     const alwaysShowCheckboxes = document.querySelectorAll('.always-show-checkbox');
+    const showPrimarilyCheckboxes = document.querySelectorAll('.show-primarily-checkbox'); // New
     
     // Function to update preferences
-    function updatePreferences(verb, tense, neverShow, alwaysShow) {
-        fetch('{{ url_for("update_preferences") }}', {
+    function updatePreferences(verb, tense, neverShow, alwaysShow, showPrimarily) { // Added showPrimarily
+        fetch('{{ url_for("preference.update_preferences") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `verb=${verb}&tense=${tense}&never_show=${neverShow}&always_show=${alwaysShow}`
+            body: `verb=${verb}&tense=${tense}&never_show=${neverShow}&always_show=${alwaysShow}&show_primarily=${showPrimarily}` // Added showPrimarily
         })
         .then(response => response.json())
         .then(data => {
@@ -101,19 +110,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const tense = this.dataset.tense;
             const neverShow = this.checked;
             
-            // If "never show" is checked, uncheck "always show"
-            if (neverShow) {
-                const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
-                if (alwaysShowCheckbox && alwaysShowCheckbox.checked) {
-                    alwaysShowCheckbox.checked = false;
-                }
+            const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+            const showPrimarilyCheckbox = document.querySelector(`.show-primarily-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+            
+            if (neverShow && showPrimarilyCheckbox && showPrimarilyCheckbox.checked) {
+                showPrimarilyCheckbox.checked = false; // Uncheck showPrimarily if neverShow is checked
             }
             
-            // Get the current state of the always show checkbox
-            const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
             const alwaysShow = alwaysShowCheckbox ? alwaysShowCheckbox.checked : false;
+            const showPrimarily = showPrimarilyCheckbox ? showPrimarilyCheckbox.checked : false;
             
-            updatePreferences(verb, tense, neverShow, alwaysShow);
+            updatePreferences(verb, tense, neverShow, alwaysShow, showPrimarily);
         });
     });
     
@@ -124,19 +131,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const tense = this.dataset.tense;
             const alwaysShow = this.checked;
             
-            // If "always show" is checked, uncheck "never show"
-            if (alwaysShow) {
-                const neverShowCheckbox = document.querySelector(`.never-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
-                if (neverShowCheckbox && neverShowCheckbox.checked) {
-                    neverShowCheckbox.checked = false;
-                }
-            }
-            
-            // Get the current state of the never show checkbox
             const neverShowCheckbox = document.querySelector(`.never-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
-            const neverShow = neverShowCheckbox ? neverShowCheckbox.checked : false;
+            const showPrimarilyCheckbox = document.querySelector(`.show-primarily-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
             
-            updatePreferences(verb, tense, neverShow, alwaysShow);
+            const neverShow = neverShowCheckbox ? neverShowCheckbox.checked : false;
+            const showPrimarily = showPrimarilyCheckbox ? showPrimarilyCheckbox.checked : false;
+            
+            updatePreferences(verb, tense, neverShow, alwaysShow, showPrimarily);
+        });
+    });
+
+    // Add event listeners to show primarily checkboxes (New)
+    showPrimarilyCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const verb = this.dataset.verb;
+            const tense = this.dataset.tense;
+            const showPrimarily = this.checked;
+
+            const neverShowCheckbox = document.querySelector(`.never-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+            const alwaysShowCheckbox = document.querySelector(`.always-show-checkbox[data-verb="${verb}"][data-tense="${tense}"]`);
+
+            if (showPrimarily && neverShowCheckbox && neverShowCheckbox.checked) {
+                neverShowCheckbox.checked = false; // Uncheck neverShow if showPrimarily is checked
+            }
+
+            const neverShow = neverShowCheckbox ? neverShowCheckbox.checked : false;
+            const alwaysShow = alwaysShowCheckbox ? alwaysShowCheckbox.checked : false;
+
+            updatePreferences(verb, tense, neverShow, alwaysShow, showPrimarily);
         });
     });
 });
