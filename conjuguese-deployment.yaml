@@ -19,7 +19,7 @@ spec:
       containers:
       - name: conjuguese-container
         # This is your private image from the locked warehouse
-        image: ehellrung/conjuguese:2025.06.17
+        image: ehellrung/conjuguese:2.0
         ports:
         - containerPort: 5000 # The port from your Dockerfile
 
