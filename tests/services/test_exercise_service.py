@@ -30,8 +30,8 @@ def test_select_exercises_successful_selection(mocker, mock_preferences_full):
     When: select_exercises(num_exercises=5) is called.
     Then: It should return a list of 5 unique exercise tuples (verb, tense), where each verb and tense is valid according to the mocked preferences.
     """
-    mocker.patch('src.data_access.file_handler.load_preferences', return_value=mock_preferences_full)
-    mocker.patch('src.data_access.file_handler.load_results', return_value={}) # Ensure no results interfere
+    mocker.patch('src.data_access.db_handler.load_preferences', return_value=mock_preferences_full)
+    mocker.patch('src.data_access.db_handler.load_results', return_value={}) # Ensure no results interfere
 
     # Create a VERBS mock that includes all verbs and tenses from mock_preferences_full
     # The actual conjugations don't matter for select_exercises, just their existence
@@ -61,8 +61,8 @@ def test_select_exercises_not_enough_available(mocker, mock_preferences_limited)
     When: select_exercises(num_exercises=5) is called.
     Then: It should return a list containing all available unique exercises, even if fewer than num_exercises.
     """
-    mocker.patch('src.data_access.file_handler.load_preferences', return_value=mock_preferences_limited)
-    mocker.patch('src.data_access.file_handler.load_results', return_value={}) # Ensure no results interfere
+    mocker.patch('src.data_access.db_handler.load_preferences', return_value=mock_preferences_limited)
+    mocker.patch('src.data_access.db_handler.load_results', return_value={}) # Ensure no results interfere
 
     # Create a VERBS mock that includes only the limited verbs and tenses
     mock_verbs_data = {
@@ -90,8 +90,8 @@ def test_select_exercises_no_exercises_available(mocker, mock_preferences_empty)
     When: select_exercises(num_exercises=5) is called.
     Then: It should return an empty list [].
     """
-    mocker.patch('src.data_access.file_handler.load_preferences', return_value=mock_preferences_empty)
-    mocker.patch('src.data_access.file_handler.load_results', return_value={}) # Ensure no results interfere
+    mocker.patch('src.data_access.db_handler.load_preferences', return_value=mock_preferences_empty)
+    mocker.patch('src.data_access.db_handler.load_results', return_value={}) # Ensure no results interfere
     mocker.patch('src.services.exercise_service.VERBS', new={}) # No verbs available
 
     num_exercises = 5

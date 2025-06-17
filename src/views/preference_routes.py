@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
-from ..data_access import file_handler # Import file_handler
+from ..data_access import db_handler
 
 bp = Blueprint('preference', __name__)
 
 @bp.route('/update_preferences', methods=['POST'])
 def update_preferences():
     """Update verb preferences."""
-    preferences = file_handler.load_preferences()
+    preferences = db_handler.load_preferences(db_handler.DEFAULT_USER_ID)
     verb = request.form.get('verb')
     tense = request.form.get('tense')
     never_show = request.form.get('never_show') == 'true'
@@ -19,9 +19,12 @@ def update_preferences():
         # Initialize with defaults, including the new show_primarily
         preferences[verb][tense] = {"never_show": False, "always_show": False, "show_primarily": False}
 
-    preferences[verb][tense]["never_show"] = never_show
-    preferences[verb][tense]["always_show"] = always_show
-    preferences[verb][tense]["show_primarily"] = show_primarily  # Save the new preference
-
-    file_handler.save_preferences(preferences)
+    preference_data = {
+        "verb": verb,
+        "tense": tense,
+        "never_show": never_show,
+        "always_show": always_show,
+        "show_primarily": show_primarily
+    }
+    db_handler.save_preference(db_handler.DEFAULT_USER_ID, preference_data)
     return jsonify({"success": True})

@@ -3,6 +3,7 @@ import json
 import random
 from ..services import exercise_service
 from ..core_data import TENSE_NAMES, PRONOUNS, VERBS
+from ..data_access import db_handler # Import db_handler
 
 bp = Blueprint('exercise', __name__)
 
@@ -31,10 +32,10 @@ def exercise():
 
     if request.method == 'POST':
         current_verb, current_tense = session['exercises'][session['current_index']]
-        user_answers = [request.form.get(f'answer_{i}', '').strip() for i in range(4)]
+        user_answers = [request.form.get(f'answer_{i}', '').strip() for i in range(len(PRONOUNS))]
 
         processing_results = exercise_service.process_exercise_submission(
-            current_verb, current_tense, user_answers
+            current_verb, current_tense, user_answers, db_handler.DEFAULT_USER_ID
         )
         current_exercise_errors = processing_results.get('errors_list', [])
         session['all_errors_in_session'].extend(current_exercise_errors)
@@ -45,7 +46,8 @@ def exercise():
 
         if session['current_index'] >= len(session['exercises']):
             all_errors = session.pop('all_errors_in_session', [])
-            random.shuffle(all_errors)
+            # Removed random.shuffle(all_errors) for deterministic behavior, especially for testing.
+            # If random order is desired for UX, it should be applied consistently elsewhere or re-added with a seed for tests.
 
             if len(all_errors) > 5:
                 session['sentence_errors'] = all_errors[:5]
@@ -165,6 +167,13 @@ def remediation_flow():
 
             if not is_sentence_correct:
                 remaining_sentence_errors.append(error)
+
+        # Save each practiced sentence to the database
+        from ..data_access import db_handler # Import here to avoid circular dependency if needed, or at top
+        for sentence_data_with_index in sentence_practice_results:
+            # Create a copy and remove the 'index' key as it's not part of the database schema
+            sentence_data_for_db = {k: v for k, v in sentence_data_with_index.items() if k != 'index'}
+            db_handler.save_sentence(sentence_data_for_db, db_handler.DEFAULT_USER_ID)
 
         session['remediation_errors'] = remaining_remediation_errors
         session['remediation_results'] = remediation_results

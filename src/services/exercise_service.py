@@ -1,13 +1,13 @@
 import random
 from datetime import datetime
-from ..data_access import file_handler # Import file_handler for now
+from ..data_access import db_handler
 from ..core_data import VERBS, PRONOUNS
 from . import gemini_service # Import gemini_service
 
-def get_available_exercises():
+def get_available_exercises(user_id: str = db_handler.DEFAULT_USER_ID):
     """Get lists of available exercises (primary and secondary) based on preferences and results."""
-    results = file_handler.load_results()
-    preferences = file_handler.load_preferences()
+    results = db_handler.load_results(user_id)
+    preferences = db_handler.load_preferences(user_id)
     primary_pool = []
     secondary_pool = []
 
@@ -106,14 +106,8 @@ def select_exercises(count=5):
             
     return selected_exercises
 
-def update_results(verb, tense, user_answers):
-    """Update the results file with the latest exercise results."""
-    results = file_handler.load_results()
-    verb_tense_key = f"{verb}_{tense}"
-
-    if verb_tense_key not in results:
-        results[verb_tense_key] = {}
-
+def update_results(verb, tense, user_answers, user_id: str = db_handler.DEFAULT_USER_ID):
+    """Update the database with the latest exercise results."""
     timestamp = datetime.now().isoformat()
 
     for i, pronoun in enumerate(PRONOUNS):
@@ -121,15 +115,17 @@ def update_results(verb, tense, user_answers):
         correct_answer = VERBS[verb][tense][i]
         is_correct = user_answer == correct_answer
 
-        results[verb_tense_key][pronoun] = {
-            "last_answer": user_answer,
-            "timestamp": timestamp,
-            "correct": is_correct
+        result_data = {
+            "verb": verb,
+            "tense": tense,
+            "pronoun": pronoun,
+            "user_answer": user_answer,
+            "is_correct": is_correct,
+            "timestamp": timestamp
         }
+        db_handler.save_result(result_data, user_id)
 
-    file_handler.save_results(results)
-
-def process_exercise_submission(verb, tense, user_answers):
+def process_exercise_submission(verb, tense, user_answers, user_id: str = db_handler.DEFAULT_USER_ID):
     """
     Processes a user's exercise submission, updates results, and returns feedback.
     Returns a dictionary with results_list, all_correct, and errors_list.
@@ -159,8 +155,8 @@ def process_exercise_submission(verb, tense, user_answers):
             'is_correct': is_correct
         })
 
-    # Update results file
-    update_results(verb, tense, user_answers)
+    # Update results in database
+    update_results(verb, tense, user_answers, user_id)
 
     # Return the complete errors_list for the current exercise
     return {

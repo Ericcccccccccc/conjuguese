@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import google.generativeai as genai
+from supabase import create_client, Client
 
 load_dotenv() # Load environment variables from .env
 
@@ -16,12 +17,13 @@ if GOOGLE_API_KEY:
 else:
     print("WARNING: GOOGLE_GEMINI_API_KEY not found in environment variables. Gemini features may be disabled.")
 
-# Data File Paths (for current JSON storage)
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data') # Adjust path to point to the data directory at the project root
-RESULTS_FILE = os.path.join(DATA_DIR, 'results.json')
-SENTENCES_FILE = os.path.join(DATA_DIR, 'sentences.json')
-PREFERENCES_FILE = os.path.join(DATA_DIR, 'preferences.json')
-# SESSION_FILE = os.path.join(DATA_DIR, 'current_session.json') # This was not used in app.py, can be removed
+# Supabase Configuration
+SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
 
-# Future Database Configuration (Placeholder)
-DATABASE_URL = os.getenv('DATABASE_URL') # Example for Supabase connection string
+supabase: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("DEBUG: Supabase client initialized.")
+else:
+    print("WARNING: Supabase URL or Key not found in environment variables. Database features may be disabled.")

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, session, jsonify, request
-from ..data_access import file_handler # Import file_handler for now
+from ..data_access import db_handler
 from ..core_data import VERBS, TENSE_NAMES, PRONOUNS
 
 bp = Blueprint('main', __name__)
@@ -40,8 +40,10 @@ def clear_session_and_index():
 @bp.route('/records')
 def records():
     """Show records of all verb conjugations."""
-    results = file_handler.load_results()
-    preferences = file_handler.load_preferences()
+    results = db_handler.load_results(db_handler.DEFAULT_USER_ID)
+    preferences = db_handler.load_preferences(db_handler.DEFAULT_USER_ID)
+    print(f"DEBUG: main_routes.py - Type of results: {type(results)}, Content: {results}")
+    print(f"DEBUG: main_routes.py - Type of preferences: {type(preferences)}, Content: {preferences}")
 
     # Organize data for display
     verbs_data = {}
@@ -78,5 +80,6 @@ def records():
 @bp.route('/sentences')
 def sentences():
     """Show all recorded sentences."""
-    all_sentences = file_handler.load_sentences()
+    all_sentences = db_handler.load_sentences(db_handler.DEFAULT_USER_ID)
+    print(f"DEBUG: main_routes.py - Type of all_sentences: {type(all_sentences)}, Content: {all_sentences}")
     return render_template('sentences.html', sentences=all_sentences, tense_names=TENSE_NAMES)
