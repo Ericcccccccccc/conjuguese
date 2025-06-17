@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conjuguese-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conjuguese
+  template:
+    metadata:
+      labels:
+        app: conjuguese
+    spec:
+      # THIS IS THE MAGIC! It tells the Pod to use the key (Secret)
+      # you created to pull the image.
+      imagePullSecrets:
+      - name: dockerhub-creds
+      containers:
+      - name: conjuguese-container
+        # This is your private image from the locked warehouse
+        image: ehellrung/conjuguese:2025.06.17
+        ports:
+        - containerPort: 5000 # The port from your Dockerfile
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conjuguese-service
+spec:
+  # NodePort is a great way to access apps on Minikube
+  type: NodePort
+  selector:
+    app: conjuguese
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
