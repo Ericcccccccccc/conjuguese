@@ -26,5 +26,5 @@ def update_preferences():
         "always_show": always_show,
         "show_primarily": show_primarily
     }
-    db_handler.save_preference(db_handler.DEFAULT_USER_ID, preference_data)
+    db_handler.save_preference(preference_data, db_handler.DEFAULT_USER_ID)
     return jsonify({"success": True})

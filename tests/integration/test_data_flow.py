@@ -141,8 +141,8 @@ class TestDataFlow:
         assert mock_save_sentence.called
 
         # Get the first call's arguments
-        # The first argument is now user_id, the second is the data
-        actual_call_args = mock_save_sentence.call_args_list[0].args[1]
+        actual_call_args = mock_save_sentence.call_args_list[0].args[0] # sentence_data dict
+        actual_user_id = mock_save_sentence.call_args_list[0].args[1] # user_id string
 
         # Manually compare critical fields
         assert actual_call_args.get('verb') == expected_sentence_data_passed['verb']
@@ -157,3 +157,44 @@ class TestDataFlow:
 
         # Check for content on the remediation results page
         assert "<h2>Resultados da Remediação</h2>".encode('utf-8') in response.data
+
+    def test_update_preferences_saves_preference(self, client, mock_db_handler_save_functions):
+        _, _, mock_save_preference, _, _, _ = mock_db_handler_save_functions
+
+        test_verb = "falar"
+        test_tense = "presente"
+        test_never_show = "true" # Sent as string from frontend
+        test_always_show = "false"
+        test_show_primarily = "true"
+
+        response = client.post('/update_preferences', data={
+            'verb': test_verb,
+            'tense': test_tense,
+            'never_show': test_never_show,
+            'always_show': test_always_show,
+            'show_primarily': test_show_primarily
+        })
+
+        # Assert that save_preference was called
+        mock_save_preference.assert_called_once()
+
+        # Verify the arguments passed to save_preference
+        call_args, call_kwargs = mock_save_preference.call_args
+        
+        # Verify the arguments passed to save_preference
+        actual_preference_data = call_args[0] # preference_data dict
+        actual_user_id = call_args[1] # user_id string
+        
+        # Assert that preference_data is a dictionary
+        assert isinstance(actual_preference_data, dict)
+
+        # Assert the content of the preference_data dictionary
+        assert actual_preference_data['verb'] == test_verb
+        assert actual_preference_data['tense'] == test_tense
+        assert actual_preference_data['never_show'] == (test_never_show == 'true')
+        assert actual_preference_data['always_show'] == (test_always_show == 'true')
+        assert actual_preference_data['show_primarily'] == (test_show_primarily == 'true')
+        
+        assert actual_user_id == db_handler.DEFAULT_USER_ID
+        assert response.status_code == 200
+        assert response.json == {"success": True}
